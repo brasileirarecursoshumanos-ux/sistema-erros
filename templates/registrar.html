@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Erro - Sistema de Erros{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Cabeçalho -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h1 class="card-title">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Registrar Novo Erro
+                    </h1>
+                    <p class="card-text text-muted">
+                        Preencha o formulário passo a passo para registrar um novo erro
+                    </p>
+                </div>
+            </div>
+
+            <!-- Indicador de Passos -->
+            <div class="step-indicator mb-5">
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Selecionar Filial</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Escolher Vendedor</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Selecionar Erro</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirmar Dados</div>
+                </div>
+            </div>
+
+            <!-- Conteúdo Dinâmico -->
+            <div id="conteudo-passo">
+                <!-- Passo 1: Selecionar Filial -->
+                <div class="passo-conteudo" id="passo1">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-store me-2"></i>
+                            Passo 1: Selecione a Filial
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Clique na filial correspondente ao vendedor que cometeu o erro:
+                            </p>
+                            
+                            <div class="row" id="lista-filiais">
+                                <!-- Filiais carregadas via JavaScript -->
+                            </div>
+                            
+                            <div class="mt-4" id="info-filial-selecionada" style="display: none;">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Filial selecionada:</strong>
+                                    <span id="nome-filial-selecionada"></span>
+                                    <span id="gerente-filial-selecionada" class="ms-3"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end mt-4">
+                                <button class="btn btn-primary" onclick="avancarParaPasso2()" disabled id="btn-avancar-passo1">
+                                    <i class="fas fa-arrow-right me-2"></i> Avançar para Passo 2
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 2: Escolher Vendedor -->
+                <div class="passo-conteudo" id="passo2" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-user me-2"></i>
+                            Passo 2: Selecione o Vendedor
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-secondary mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Filial selecionada: <strong id="filial-atual"></strong>
+                            </div>
+                            
+                            <p class="text-muted mb-4">
+                                Selecione o vendedor que cometeu o erro:
+                            </p>
+                            
+                            <div class="row" id="lista-vendedores">
+                                <!-- Vendedores carregados via JavaScript -->
+                            </div>
+                            
+                            <div class="mt-4" id="info-vendedor-selecionado" style="display: none;">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-user-check me-2"></i>
+                                    <strong>Vendedor selecionado:</strong>
+                                    <span id="nome-vendedor-selecionado"></span>
+                                    <span id="matricula-vendedor-selecionado" class="ms-3"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-outline-secondary" onclick="voltarParaPasso1()">
+                                    <i class="fas fa-arrow-left me-2"></i> Voltar
+                                </button>
+                                <button class="btn btn-primary" onclick="avancarParaPasso3()" disabled id="btn-avancar-passo2">
+                                    <i class="fas fa-arrow-right me-2"></i> Avançar para Passo 3
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 3: Selecionar Erro -->
+                <div class="passo-conteudo" id="passo3" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Passo 3: Selecione o Tipo de Erro
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-secondary mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Filial: <strong id="filial-atual-2"></strong> | 
+                                Vendedor: <strong id="vendedor-atual"></strong>
+                            </div>
+                            
+                            <p class="text-muted mb-4">
+                                Selecione o tipo de erro cometido pelo vendedor:
+                            </p>
+                            
+                            <div class="accordion" id="accordionErros">
+                                <!-- Tipos de erro carregados via JavaScript -->
+                            </div>
+                            
+                            <div class="mt-4" id="info-erro-selecionado" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <strong>Erro selecionado:</strong>
+                                    <span id="descricao-erro-selecionado"></span>
+                                    <span class="ms-3"><strong>Penalização:</strong> <span id="penalizacao-erro-selecionado"></span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-outline-secondary" onclick="voltarParaPasso2()">
+                                    <i class="fas fa-arrow-left me-2"></i> Voltar
+                                </button>
+                                <button class="btn btn-primary" onclick="avancarParaPasso4()" disabled id="btn-avancar-passo3">
+                                    <i class="fas fa-arrow-right me-2"></i> Avançar para Passo 4
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 4: Confirmar Dados -->
+                <div class="passo-conteudo" id="passo4" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Passo 4: Confirmar e Registrar
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Revise todos os dados antes de registrar o erro
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-store me-2"></i>
+                                                Filial
+                                            </h5>
+                                            <p class="card-text" id="confirmacao-filial">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-user me-2"></i>
+                                                Vendedor
+                                            </h5>
+                                            <p class="card-text" id="confirmacao-vendedor">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Erro Cometido
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <p class="card-text" id="confirmacao-erro">-</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p class="card-text">
+                                                <strong>Penalização:</strong>
+                                                <span class="badge bg-danger" id="confirmacao-penalizacao">-</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-edit me-2"></i>
+                                        Detalhes Adicionais
+                                    </h5>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="data-ocorrencia" class="form-label">
+                                                <i class="fas fa-calendar-alt me-2"></i>
+                                                Data da Ocorrência
+                                            </label>
+                                            <input type="date" class="form-control" id="data-ocorrencia" 
+                                                  value="{{ now.strftime('%Y-%m-%d') }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="quantidade" class="form-label">
+                                                <i class="fas fa-hashtag me-2"></i>
+                                                Quantidade
+                                            </label>
+                                            <input type="number" class="form-control" id="quantidade" 
+                                                   value="1" min="1">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="observacoes" class="form-label">
+                                            <i class="fas fa-sticky-note me-2"></i>
+                                            Observações (Opcional)
+                                        </label>
+                                        <textarea class="form-control" id="observacoes" 
+                                                  rows="3" placeholder="Descreva detalhes adicionais..."></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="registrado-por" class="form-label">
+                                            <i class="fas fa-signature me-2"></i>
+                                            Registrado por
+                                        </label>
+                                        <input type="text" class="form-control" id="registrado-por" 
+                                               placeholder="Seu nome">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-outline-secondary" onclick="voltarParaPasso3()">
+                                    <i class="fas fa-arrow-left me-2"></i> Voltar
+                                </button>
+                                <button class="btn btn-success" onclick="registrarErro()" id="btn-registrar">
+                                    <i class="fas fa-save me-2"></i> Confirmar e Registrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Variáveis globais
+    let filialSelecionada = null;
+    let vendedorSelecionado = null;
+    let erroSelecionado = null;
+    
+    $(document).ready(function() {
+        // Carregar filiais
+        carregarFiliais();
+        
+        // Configurar data atual como padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        $('#data-ocorrencia').val(hoje);
+    });
+    
+    function carregarFiliais() {
+        $.get('/api/filiais', function(filiais) {
+            const container = $('#lista-filiais');
+            container.empty();
+            
+            filiais.forEach(function(filial) {
+                container.append(`
+                    <div class="col-md-4 col-6 mb-3">
+                        <div class="filial-card card" onclick="selecionarFilial('${filial.codigo}', '${filial.nome}', '${filial.gerente}')">
+                            <div class="card-body text-center">
+                                <i class="fas fa-store fa-2x mb-3 text-primary"></i>
+                                <h5 class="card-title">${filial.codigo}</h5>
+                                <p class="card-text small">${filial.nome}</p>
+                                <p class="card-text text-muted smaller">
+                                    <i class="fas fa-user-tie"></i> ${filial.gerente}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        });
+    }
+    
+    function selecionarFilial(codigo, nome, gerente) {
+        // Remover seleção anterior
+        $('.filial-card').removeClass('selected');
+        
+        // Adicionar seleção atual
+        $(`[onclick*="${codigo}"]`).closest('.filial-card').addClass('selected');
+        
+        filialSelecionada = {
+            codigo: codigo,
+            nome: nome,
+            gerente: gerente
+        };
+        
+        // Mostrar informações
+        $('#nome-filial-selecionada').text(`${codigo} - ${nome}`);
+        $('#gerente-filial-selecionada').html(`<i class="fas fa-user-tie"></i> Gerente: ${gerente}`);
+        $('#info-filial-selecionada').show();
+        
+        // Habilitar botão avançar
+        $('#btn-avancar-passo1').prop('disabled', false);
+        
+        // Atualizar filial atual nos próximos passos
+        $('#filial-atual').text(`${codigo} - ${nome}`);
+        $('#filial-atual-2').text(`${codigo} - ${nome}`);
+        $('#confirmacao-filial').html(`
+            <strong>${codigo}</strong> - ${nome}<br>
+            <small class="text-muted"><i class="fas fa-user-tie"></i> Gerente: ${gerente}</small>
+        `);
+    }
+    
+    function avancarParaPasso2() {
+        if (!filialSelecionada) {
+            showAlert('error', 'Atenção', 'Selecione uma filial primeiro!');
+            return;
+        }
+        
+        // Atualizar indicador de passos
+        atualizarPassos(2);
+        
+        // Carregar vendedores da filial selecionada
+        carregarVendedores();
+    }
+    
+    function carregarVendedores() {
+        $.get(`/api/vendedores/${filialSelecionada.codigo}`, function(vendedores) {
+            const container = $('#lista-vendedores');
+            container.empty();
+            
+            if (vendedores.length === 0) {
+                container.append(`
+                    <div class="col-12 text-center">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-users-slash me-2"></i>
+                            Nenhum vendedor cadastrado nesta filial.
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+            
+            vendedores.forEach(function(vendedor) {
+                container.append(`
+                    <div class="col-md-6 col-12 mb-3">
+                        <div class="vendedor-card" onclick="selecionarVendedor('${vendedor.nome_completo}', '${vendedor.matricula}')">
+                            <h6 class="mb-1">
+                                <i class="fas fa-user me-2"></i>
+                                ${vendedor.nome_completo}
+                            </h6>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-id-card me-1"></i>
+                                Matrícula: ${vendedor.matricula}
+                            </p>
+                        </div>
+                    </div>
+                `);
+            });
+        });
+    }
+    
+    function selecionarVendedor(nome, matricula) {
+        // Remover seleção anterior
+        $('.vendedor-card').removeClass('selected');
+        
+        // Adicionar seleção atual
+        $(`[onclick*="${nome}"]`).closest('.vendedor-card').addClass('selected');
+        
+        vendedorSelecionado = {
+            nome: nome,
+            matricula: matricula
+        };
+        
+        // Mostrar informações
+        $('#nome-vendedor-selecionado').text(nome);
+        $('#matricula-vendedor-selecionado').html(`<i class="fas fa-id-card"></i> Matrícula: ${matricula}`);
+        $('#info-vendedor-selecionado').show();
+        $('#vendedor-atual').text(nome);
+        $('#confirmacao-vendedor').html(`
+            ${nome}<br>
+            <small class="text-muted"><i class="fas fa-id-card"></i> Matrícula: ${matricula}</small>
+        `);
+        
+        // Habilitar botão avançar
+        $('#btn-avancar-passo2').prop('disabled', false);
+    }
+    
+    function voltarParaPasso1() {
+        atualizarPassos(1);
+        $('#lista-vendedores').empty();
+        vendedorSelecionado = null;
+    }
+    
+    function avancarParaPasso3() {
+        if (!filialSelecionada || !vendedorSelecionado) {
+            showAlert('error', 'Atenção', 'Selecione um vendedor primeiro!');
+            return;
+        }
+        
+        // Atualizar indicador de passos
+        atualizarPassos(3);
+        
+        // Carregar tipos de erro
+        carregarTiposErro();
+    }
+    
+    function carregarTiposErro() {
+        $.get('/api/tipos-erro', function(tipos) {
+            const accordion = $('#accordionErros');
+            accordion.empty();
+            
+            // Agrupar por categoria
+            const categorias = {};
+            tipos.forEach(function(tipo) {
+                if (!categorias[tipo.categoria]) {
+                    categorias[tipo.categoria] = [];
+                }
+                categorias[tipo.categoria].push(tipo);
+            });
+            
+            let accordionIndex = 0;
+            for (const categoria in categorias) {
+                const itens = categorias[categoria];
+                const accordionId = `accordion-${accordionIndex}`;
+                
+                accordion.append(`
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#${accordionId}" aria-expanded="true">
+                                <i class="fas fa-folder me-2"></i>
+                                ${categoria}
+                                <span class="badge bg-secondary ms-2">${itens.length}</span>
+                            </button>
+                        </h2>
+                        <div id="${accordionId}" class="accordion-collapse collapse show" 
+                             data-bs-parent="#accordionErros">
+                            <div class="accordion-body">
+                                <div class="row">
+                `);
+                
+                itens.forEach(function(erro) {
+                    accordion.find(`#${accordionId} .accordion-body .row`).append(`
+                        <div class="col-md-6 mb-3">
+                            <div class="erro-card" onclick="selecionarErro('${erro.criterio}', '${erro.sigla}', '${erro.penalizacao}')">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="erro-sigla">${erro.sigla}</span>
+                                        <strong>${erro.criterio}</strong>
+                                    </div>
+                                    <span class="erro-penalizacao">${erro.penalizacao}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+                
+                accordion.find(`#${accordionId} .accordion-body`).append('</div></div></div>');
+                accordionIndex++;
+            }
+        });
+    }
+    
+    function selecionarErro(criterio, sigla, penalizacao) {
+        // Remover seleção anterior
+        $('.erro-card').removeClass('selected');
+        
+        // Adicionar seleção atual
+        $(`[onclick*="${criterio}"]`).closest('.erro-card').addClass('selected');
+        
+        erroSelecionado = {
+            criterio: criterio,
+            sigla: sigla,
+            penalizacao: penalizacao
+        };
+        
+        // Mostrar informações
+        $('#descricao-erro-selecionado').html(`
+            <span class="badge bg-warning">${sigla}</span> ${criterio}
+        `);
+        $('#penalizacao-erro-selecionado').text(penalizacao);
+        $('#info-erro-selecionado').show();
+        $('#confirmacao-erro').html(`
+            <span class="badge bg-warning">${sigla}</span> ${criterio}
+        `);
+        $('#confirmacao-penalizacao').text(penalizacao);
+        
+        // Habilitar botão avançar
+        $('#btn-avancar-passo3').prop('disabled', false);
+    }
+    
+    function voltarParaPasso2() {
+        atualizarPassos(2);
+        erroSelecionado = null;
+    }
+    
+    function avancarParaPasso4() {
+        if (!filialSelecionada || !vendedorSelecionado || !erroSelecionado) {
+            showAlert('error', 'Atenção', 'Selecione um tipo de erro primeiro!');
+            return;
+        }
+        
+        atualizarPassos(4);
+    }
+    
+    function voltarParaPasso3() {
+        atualizarPassos(3);
+    }
+    
+    function atualizarPassos(passoAtual) {
+        // Esconder todos os conteúdos
+        $('.passo-conteudo').hide();
+        
+        // Mostrar conteúdo do passo atual
+        $(`#passo${passoAtual}`).show();
+        
+        // Atualizar indicadores
+        $('.step').removeClass('active');
+        $(`#step${passoAtual}`).addClass('active');
+        
+        // Rolar para o topo
+        window.scrollTo(0, 0);
+    }
+    
+    function registrarErro() {
+        // Validar dados
+        const registradoPor = $('#registrado-por').val().trim();
+        if (!registradoPor) {
+            showAlert('error', 'Atenção', 'Informe seu nome no campo "Registrado por"!');
+            $('#registrado-por').focus();
+            return;
+        }
+        
+        const data = {
+            filial: filialSelecionada.codigo,
+            vendedor: vendedorSelecionado.nome,
+            tipo_erro: erroSelecionado.criterio,
+            sigla: erroSelecionado.sigla,
+            penalizacao: erroSelecionado.penalizacao,
+            data_ocorrencia: $('#data-ocorrencia').val(),
+            quantidade: $('#quantidade').val(),
+            observacoes: $('#observacoes').val().trim(),
+            registrado_por: registradoPor
+        };
+        
+        // Mostrar loading no botão
+        const btn = $('#btn-registrar');
+        const originalText = btn.html();
+        btn.prop('disabled', true).html(`
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Registrando...
+        `);
+        
+        // Enviar para API
+        $.ajax({
+            url: '/api/registrar-erro',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', 'Sucesso!', response.message);
+                    
+                    // Resetar formulário após 2 segundos
+                    setTimeout(function() {
+                        resetarFormulario();
+                        showAlert('info', 'Pronto!', 'Formulário resetado para novo registro.');
+                    }, 2000);
+                } else {
+                    showAlert('error', 'Erro!', response.message);
+                    btn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function() {
+                showAlert('error', 'Erro!', 'Falha na comunicação com o servidor.');
+                btn.prop('disabled', false).html(originalText);
+            }
+        });
+    }
+    
+    function resetarFormulario() {
+        // Resetar variáveis
+        filialSelecionada = null;
+        vendedorSelecionado = null;
+        erroSelecionado = null;
+        
+        // Resetar UI
+        $('.filial-card, .vendedor-card, .erro-card').removeClass('selected');
+        $('.passo-conteudo').hide();
+        $('#passo1').show();
+        
+        // Resetar passos
+        $('.step').removeClass('active');
+        $('#step1').addClass('active');
+        
+        // Resetar informações
+        $('#info-filial-selecionada, #info-vendedor-selecionado, #info-erro-selecionado').hide();
+        
+        // Resetar botões
+        $('.btn-avancar').prop('disabled', true);
+        
+        // Resetar campos do passo 4
+        $('#data-ocorrencia').val(new Date().toISOString().split('T')[0]);
+        $('#quantidade').val(1);
+        $('#observacoes').val('');
+        $('#registrado-por').val('');
+        
+        // Recarregar filiais
+        carregarFiliais();
+    }
+</script>
+{% endblock %}

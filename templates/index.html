@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Início - Sistema de Erros{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner Principal -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-clipboard-check me-3"></i>
+                        Sistema de Registro de Erros
+                    </h1>
+                    <p class="lead mb-4">
+                        Sistema completo para registro e gestão de erros dos vendedores das 13 filiais
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card bg-success">
+                                <i class="fas fa-store"></i>
+                                <div class="stat-number" id="total-filiais">13</div>
+                                <div class="stat-label">Filiais</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card bg-info">
+                                <i class="fas fa-users"></i>
+                                <div class="stat-number" id="total-vendedores">43</div>
+                                <div class="stat-label">Vendedores</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card bg-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div class="stat-number" id="total-erros">15</div>
+                                <div class="stat-label">Tipos de Erro</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card bg-secondary">
+                                <i class="fas fa-chart-line"></i>
+                                <div class="stat-number" id="total-registros">0</div>
+                                <div class="stat-label">Registros</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-bolt me-2"></i>
+                Ações Rápidas
+            </h2>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Registrar Erro</h4>
+                    <p class="card-text">Registre um novo erro de forma rápida e simples.</p>
+                    <a href="/registrar" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i> Registrar Agora
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
+                    <h4 class="card-title">Gerar Relatório</h4>
+                    <p class="card-text">Gere relatórios detalhados por filial ou período.</p>
+                    <a href="/relatorios" class="btn btn-success">
+                        <i class="fas fa-download me-2"></i> Ver Relatórios
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tachometer-alt fa-3x text-warning mb-3"></i>
+                    <h4 class="card-title">Dashboard</h4>
+                    <p class="card-text">Acompanhe estatísticas e métricas em tempo real.</p>
+                    <a href="/dashboard" class="btn btn-warning">
+                        <i class="fas fa-chart-line me-2"></i> Ver Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Registros -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-history me-2"></i>
+                    Últimos Registros
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tabela-ultimos-registros">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Filial</th>
+                                    <th>Vendedor</th>
+                                    <th>Erro</th>
+                                    <th>Penalização</th>
+                                    <th>Registrado por</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="/relatorios" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i> Ver Todos os Registros
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Carregar estatísticas
+        $.get('/api/estatisticas', function(data) {
+            $('#total-registros').text(data.total_registros);
+        });
+        
+        // Carregar últimos registros
+        $.get('/api/ultimos-registros', function(data) {
+            const tbody = $('#tabela-ultimos-registros tbody');
+            tbody.empty();
+            
+            if (data.length === 0) {
+                tbody.append(`
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-3"></i>
+                            <p class="mb-0">Nenhum registro encontrado</p>
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+            
+            data.forEach(function(registro) {
+                const dataFormatada = formatDate(registro.data_ocorrencia);
+                
+                tbody.append(`
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary">${dataFormatada}</span>
+                        </td>
+                        <td>
+                            <strong>${registro.filial}</strong><br>
+                            <small class="text-muted">${registro.nome_filial}</small>
+                        </td>
+                        <td>${registro.vendedor}</td>
+                        <td>
+                            <span class="badge bg-warning">${registro.sigla}</span>
+                            ${registro.tipo_erro}
+                        </td>
+                        <td>
+                            <span class="badge bg-danger">${registro.penalizacao}</span>
+                        </td>
+                        <td>
+                            <small>${registro.registrado_por}</small>
+                        </td>
+                    </tr>
+                `);
+            });
+        });
+    });
+</script>
+{% endblock %}
