@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema de Erros{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h1 class="card-title">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Dashboard - Estatísticas
+                    </h1>
+                    <p class="card-text text-muted">
+                        Visualize métricas e estatísticas do sistema em tempo real
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card bg-primary">
+                <i class="fas fa-database"></i>
+                <div class="stat-number" id="total-registros">0</div>
+                <div class="stat-label">Total de Registros</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card bg-success">
+                <i class="fas fa-calendar-day"></i>
+                <div class="stat-number" id="registros-hoje">0</div>
+                <div class="stat-label">Registros Hoje</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card bg-warning">
+                <i class="fas fa-store"></i>
+                <div class="stat-number" id="total-filiais">13</div>
+                <div class="stat-label">Filiais</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card bg-info">
+                <i class="fas fa-users"></i>
+                <div class="stat-number" id="total-vendedores">43</div>
+                <div class="stat-label">Vendedores</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos e Tabelas -->
+    <div class="row">
+        <!-- Top Filiais -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Top 5 Filiais com Mais Erros
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tabela-top-filiais">
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Filial</th>
+                                    <th>Total de Erros</th>
+                                    <th>Percentual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Carregado via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Erros -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Top 5 Erros Mais Comuns
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tabela-top-erros">
+                            <thead>
+                                <tr>
+                                    <th>Erro</th>
+                                    <th>Sigla</th>
+                                    <th>Ocorrências</th>
+                                    <th>Frequência</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Carregado via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Registros -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-history me-2"></i>
+                        Últimos Registros
+                    </div>
+                    <a href="/relatorios" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i> Ver Todos
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tabela-ultimos-registros">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Filial</th>
+                                    <th>Vendedor</th>
+                                    <th>Erro</th>
+                                    <th>Penalização</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Carregado via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo por Categoria -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-folder me-2"></i>
+                    Erros por Categoria
+                </div>
+                <div class="card-body">
+                    <div class="row" id="categorias-container">
+                        <!-- Carregado via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-bolt me-2"></i>
+                    Ações Rápidas
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <a href="/registrar" class="btn btn-primary w-100">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Registrar Erro
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <a href="/relatorios" class="btn btn-success w-100">
+                                <i class="fas fa-file-export me-2"></i>
+                                Gerar Relatório
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <button class="btn btn-info w-100" onclick="atualizarDashboard()">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                Atualizar Dados
+                            </button>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <button class="btn btn-warning w-100" onclick="exportarDashboard()">
+                                <i class="fas fa-download me-2"></i>
+                                Exportar Dados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        carregarDashboard();
+        
+        // Atualizar a cada 30 segundos
+        setInterval(carregarDashboard, 30000);
+    });
+    
+    function carregarDashboard() {
+        // Mostrar loading
+        $('#total-registros').html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Carregar estatísticas
+        $.get('/api/estatisticas', function(data) {
+            // Atualizar estatísticas gerais
+            $('#total-registros').text(data.total_registros);
+            $('#registros-hoje').text(data.registros_hoje);
+            
+            // Top Filiais
+            const tbodyFiliais = $('#tabela-top-filiais tbody');
+            tbodyFiliais.empty();
+            
+            if (data.top_filiais && data.top_filiais.length > 0) {
+                data.top_filiais.forEach(function(filial, index) {
+                    const porcentagem = data.total_registros > 0 ? 
+                        Math.round((filial.total / data.total_registros) * 100) : 0;
+                    
+                    tbodyFiliais.append(`
+                        <tr>
+                            <td>
+                                <span class="badge bg-${index === 0 ? 'danger' : index === 1 ? 'warning' : index === 2 ? 'info' : 'secondary'}">
+                                    ${index + 1}º
+                                </span>
+                            </td>
+                            <td>
+                                <strong>${filial.filial}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">${filial.total}</span>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-${index === 0 ? 'danger' : index === 1 ? 'warning' : index === 2 ? 'info' : 'secondary'}" 
+                                         style="width: ${porcentagem}%">
+                                        ${porcentagem}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                });
+            } else {
+                tbodyFiliais.append(`
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-3"></i>
+                            <p class="mb-0">Nenhum registro encontrado</p>
+                        </td>
+                    </tr>
+                `);
+            }
+            
+            // Top Erros
+            const tbodyErros = $('#tabela-top-erros tbody');
+            tbodyErros.empty();
+            
+            if (data.top_erros && data.top_erros.length > 0) {
+                data.top_erros.forEach(function(erro, index) {
+                    const porcentagem = data.total_registros > 0 ? 
+                        Math.round((erro.total / data.total_registros) * 100) : 0;
+                    
+                    tbodyErros.append(`
+                        <tr>
+                            <td>
+                                <span class="badge bg-warning">${erro.sigla}</span>
+                                <br>
+                                <small>${erro.tipo_erro.substring(0, 30)}${erro.tipo_erro.length > 30 ? '...' : ''}</small>
+                            </td>
+                            <td>
+                                <strong>${erro.sigla}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger">${erro.total}</span>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-${index === 0 ? 'danger' : index === 1 ? 'warning' : index === 2 ? 'info' : 'secondary'}" 
+                                         style="width: ${porcentagem}%">
+                                        ${porcentagem}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                });
+            } else {
+                tbodyErros.append(`
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-3"></i>
+                            <p class="mb-0">Nenhum erro registrado</p>
+                        </td>
+                    </tr>
+                `);
+            }
+        }).fail(function() {
+            showAlert('error', 'Erro!', 'Não foi possível carregar as estatísticas.');
+        });
+        
+        // Carregar últimos registros
+        $.get('/api/ultimos-registros', function(data) {
+            const tbody = $('#tabela-ultimos-registros tbody');
+            tbody.empty();
+            
+            if (data.length === 0) {
+                tbody.append(`
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-3"></i>
+                            <p class="mb-0">Nenhum registro encontrado</p>
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+            
+            data.forEach(function(registro) {
+                const dataFormatada = formatDate(registro.data_ocorrencia);
+                
+                tbody.append(`
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary">${dataFormatada}</span>
+                        </td>
+                        <td>
+                            <strong>${registro.filial}</strong><br>
+                            <small class="text-muted">${registro.nome_filial}</small>
+                        </td>
+                        <td>${registro.vendedor}</td>
+                        <td>
+                            <span class="badge bg-warning">${registro.sigla}</span>
+                            ${registro.tipo_erro.substring(0, 25)}${registro.tipo_erro.length > 25 ? '...' : ''}
+                        </td>
+                        <td>
+                            <span class="badge bg-danger">${registro.penalizacao}</span>
+                        </td>
+                    </tr>
+                `);
+            });
+        });
+        
+        // Carregar categorias de erro
+        carregarCategorias();
+    }
+    
+    function carregarCategorias() {
+        $.get('/api/tipos-erro', function(tipos) {
+            const container = $('#categorias-container');
+            container.empty();
+            
+            // Agrupar por categoria
+            const categorias = {};
+            tipos.forEach(function(tipo) {
+                if (!categorias[tipo.categoria]) {
+                    categorias[tipo.categoria] = {
+                        nome: tipo.categoria,
+                        quantidade: 0,
+                        erros: []
+                    };
+                }
+                categorias[tipo.categoria].quantidade += 1;
+                categorias[tipo.categoria].erros.push(tipo);
+            });
+            
+            // Calcular cores para cada categoria
+            const cores = ['primary', 'success', 'warning', 'danger', 'info', 'secondary'];
+            let corIndex = 0;
+            
+            for (const categoriaNome in categorias) {
+                const categoria = categorias[categoriaNome];
+                const cor = cores[corIndex % cores.length];
+                corIndex++;
+                
+                container.append(`
+                    <div class="col-md-4 col-6 mb-3">
+                        <div class="card border-${cor}">
+                            <div class="card-body">
+                                <h5 class="card-title text-${cor}">
+                                    <i class="fas fa-folder me-2"></i>
+                                    ${categoria.nome}
+                                </h5>
+                                <p class="card-text">
+                                    <span class="badge bg-${cor}">${categoria.quantidade} tipos</span>
+                                </p>
+                                <div class="mt-2">
+                                    ${categoria.erros.slice(0, 3).map(erro => `
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small>
+                                                <span class="badge bg-warning">${erro.sigla}</span>
+                                                ${erro.criterio.substring(0, 20)}${erro.criterio.length > 20 ? '...' : ''}
+                                            </small>
+                                            <small class="text-${cor}">${erro.penalizacao}</small>
+                                        </div>
+                                    `).join('')}
+                                    ${categoria.quantidade > 3 ? `<small class="text-muted">+${categoria.quantidade - 3} mais...</small>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    function atualizarDashboard() {
+        const btn = $('button[onclick="atualizarDashboard()"]');
+        const originalText = btn.html();
+        
+        btn.prop('disabled', true).html(`
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Atualizando...
+        `);
+        
+        carregarDashboard();
+        
+        setTimeout(function() {
+            btn.prop('disabled', false).html(originalText);
+            showAlert('success', 'Sucesso!', 'Dashboard atualizado com os dados mais recentes!');
+        }, 1000);
+    }
+    
+    function exportarDashboard() {
+        // Gerar relatório geral
+        const filtros = {
+            data_inicio: '',
+            data_fim: '',
+            filial: '',
+            sigla: ''
+        };
+        
+        $.ajax({
+            url: '/api/relatorio',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(filtros),
+            success: function(response) {
+                if (response.success) {
+                    // Criar link de download
+                    const link = document.createElement('a');
+                    link.href = `/download/${response.filename}`;
+                    link.download = response.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showAlert('success', 'Sucesso!', `Dashboard exportado com ${response.total_registros} registros!`);
+                } else {
+                    showAlert('error', 'Erro!', response.message);
+                }
+            },
+            error: function() {
+                showAlert('error', 'Erro!', 'Falha na exportação.');
+            }
+        });
+    }
+</script>
+{% endblock %}

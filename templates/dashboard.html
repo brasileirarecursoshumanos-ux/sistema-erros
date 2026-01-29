@@ -1,473 +1,386 @@
-{% extends "base.html" %}
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Erros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stat-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 5px solid;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .stat-card.total { border-left-color: #0d6efd; }
+        .stat-card.hoje { border-left-color: #198754; }
+        .stat-card.filiais { border-left-color: #ffc107; }
+        .stat-card.categorias { border-left-color: #6f42c1; }
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .badge-custom {
+            font-size: 0.8em;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Bonita -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-speedometer2 me-2"></i>
+                <span class="fw-bold">Sistema de Controle de Erros</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door"></i> Início
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registrar">
+                            <i class="bi bi-plus-circle"></i> Registrar Erro
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/relatorios">
+                            <i class="bi bi-file-earmark-text"></i> Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="bi bi-graph-up"></i> Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-{% block title %}Dashboard - Sistema de Erros{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h1 class="card-title">
-                        <i class="fas fa-tachometer-alt me-2"></i>
-                        Dashboard - Estatísticas
-                    </h1>
-                    <p class="card-text text-muted">
-                        Visualize métricas e estatísticas do sistema em tempo real
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estatísticas Gerais -->
-    <div class="row mb-4">
-        <div class="col-md-3 col-6 mb-3">
-            <div class="stat-card bg-primary">
-                <i class="fas fa-database"></i>
-                <div class="stat-number" id="total-registros">0</div>
-                <div class="stat-label">Total de Registros</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="stat-card bg-success">
-                <i class="fas fa-calendar-day"></i>
-                <div class="stat-number" id="registros-hoje">0</div>
-                <div class="stat-label">Registros Hoje</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="stat-card bg-warning">
-                <i class="fas fa-store"></i>
-                <div class="stat-number" id="total-filiais">13</div>
-                <div class="stat-label">Filiais</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="stat-card bg-info">
-                <i class="fas fa-users"></i>
-                <div class="stat-number" id="total-vendedores">43</div>
-                <div class="stat-label">Vendedores</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráficos e Tabelas -->
-    <div class="row">
-        <!-- Top Filiais -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar me-2"></i>
-                    Top 5 Filiais com Mais Erros
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="tabela-top-filiais">
-                            <thead>
-                                <tr>
-                                    <th>Posição</th>
-                                    <th>Filial</th>
-                                    <th>Total de Erros</th>
-                                    <th>Percentual</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Carregado via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top Erros -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Top 5 Erros Mais Comuns
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="tabela-top-erros">
-                            <thead>
-                                <tr>
-                                    <th>Erro</th>
-                                    <th>Sigla</th>
-                                    <th>Ocorrências</th>
-                                    <th>Frequência</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Carregado via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Últimos Registros -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <i class="fas fa-history me-2"></i>
-                        Últimos Registros
+                        <h1 class="h3 fw-bold text-primary">
+                            <i class="bi bi-graph-up me-2"></i>Dashboard de Desempenho
+                        </h1>
+                        <p class="text-muted mb-0">Estatísticas e métricas em tempo real</p>
                     </div>
-                    <a href="/relatorios" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-external-link-alt me-1"></i> Ver Todos
-                    </a>
+                    <button class="btn btn-outline-primary" onclick="carregarDashboard()" id="btn-atualizar">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="tabela-ultimos-registros">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Filial</th>
-                                    <th>Vendedor</th>
-                                    <th>Erro</th>
-                                    <th>Penalização</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Carregado via JavaScript -->
-                            </tbody>
-                        </table>
+                <div class="text-end mt-2">
+                    <small class="text-muted" id="ultima-atualizacao">Carregando dados...</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4" id="cards-estatisticas">
+            <!-- Carregado via JavaScript -->
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card total">
+                    <div class="card-body text-center">
+                        <div class="text-muted mb-2">
+                            <i class="bi bi-clipboard-data fs-4"></i>
+                        </div>
+                        <h3 class="card-title text-primary fw-bold" id="total-registros">0</h3>
+                        <p class="card-text text-muted mb-0">Total de Registros</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card hoje">
+                    <div class="card-body text-center">
+                        <div class="text-muted mb-2">
+                            <i class="bi bi-calendar-day fs-4"></i>
+                        </div>
+                        <h3 class="card-title text-success fw-bold" id="registros-hoje">0</h3>
+                        <p class="card-text text-muted mb-0">Registros Hoje</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card filiais">
+                    <div class="card-body text-center">
+                        <div class="text-muted mb-2">
+                            <i class="bi bi-shop fs-4"></i>
+                        </div>
+                        <h3 class="card-title text-warning fw-bold" id="total-filiais">0</h3>
+                        <p class="card-text text-muted mb-0">Filiais Ativas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card categorias">
+                    <div class="card-body text-center">
+                        <div class="text-muted mb-2">
+                            <i class="bi bi-tags fs-4"></i>
+                        </div>
+                        <h3 class="card-title text-purple fw-bold" id="total-categorias">0</h3>
+                        <p class="card-text text-muted mb-0">Categorias</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-shop me-2"></i>Erros por Filial
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartFilial"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-pie-chart me-2"></i>Distribuição por Categoria
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartCategoria"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabelas -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-person-badge me-2"></i>Top 5 Vendedores
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Vendedor</th>
+                                        <th class="text-end">Total Erros</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-top-vendedores">
+                                    <tr><td colspan="2" class="text-center text-muted py-3">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-clock-history me-2"></i>Últimos Registros
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Filial</th>
+                                        <th>Vendedor</th>
+                                        <th>Tipo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-ultimos-registros">
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Resumo por Categoria -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-folder me-2"></i>
-                    Erros por Categoria
-                </div>
-                <div class="card-body">
-                    <div class="row" id="categorias-container">
-                        <!-- Carregado via JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ações Rápidas -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-bolt me-2"></i>
-                    Ações Rápidas
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 col-6 mb-3">
-                            <a href="/registrar" class="btn btn-primary w-100">
-                                <i class="fas fa-plus-circle me-2"></i>
-                                Registrar Erro
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <a href="/relatorios" class="btn btn-success w-100">
-                                <i class="fas fa-file-export me-2"></i>
-                                Gerar Relatório
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <button class="btn btn-info w-100" onclick="atualizarDashboard()">
-                                <i class="fas fa-sync-alt me-2"></i>
-                                Atualizar Dados
-                            </button>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <button class="btn btn-warning w-100" onclick="exportarDashboard()">
-                                <i class="fas fa-download me-2"></i>
-                                Exportar Dados
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    $(document).ready(function() {
-        carregarDashboard();
+    <script>
+        let chartFilial = null;
+        let chartCategoria = null;
         
-        // Atualizar a cada 30 segundos
-        setInterval(carregarDashboard, 30000);
-    });
-    
-    function carregarDashboard() {
-        // Mostrar loading
-        $('#total-registros').html('<i class="fas fa-spinner fa-spin"></i>');
-        
-        // Carregar estatísticas
-        $.get('/api/estatisticas', function(data) {
-            // Atualizar estatísticas gerais
-            $('#total-registros').text(data.total_registros);
-            $('#registros-hoje').text(data.registros_hoje);
-            
-            // Top Filiais
-            const tbodyFiliais = $('#tabela-top-filiais tbody');
-            tbodyFiliais.empty();
-            
-            if (data.top_filiais && data.top_filiais.length > 0) {
-                data.top_filiais.forEach(function(filial, index) {
-                    const porcentagem = data.total_registros > 0 ? 
-                        Math.round((filial.total / data.total_registros) * 100) : 0;
-                    
-                    tbodyFiliais.append(`
-                        <tr>
-                            <td>
-                                <span class="badge bg-${index === 0 ? 'danger' : index === 1 ? 'warning' : index === 2 ? 'info' : 'secondary'}">
-                                    ${index + 1}º
-                                </span>
-                            </td>
-                            <td>
-                                <strong>${filial.filial}</strong>
-                            </td>
-                            <td>
-                                <span class="badge bg-primary">${filial.total}</span>
-                            </td>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-${index === 0 ? 'danger' : index === 1 ? 'warning' : index === 2 ? 'info' : 'secondary'}" 
-                                         style="width: ${porcentagem}%">
-                                        ${porcentagem}%
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    `);
-                });
-            } else {
-                tbodyFiliais.append(`
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x mb-3"></i>
-                            <p class="mb-0">Nenhum registro encontrado</p>
-                        </td>
-                    </tr>
-                `);
-            }
-            
-            // Top Erros
-            const tbodyErros = $('#tabela-top-erros tbody');
-            tbodyErros.empty();
-            
-            if (data.top_erros && data.top_erros.length > 0) {
-                data.top_erros.forEach(function(erro, index) {
-                    const porcentagem = data.total_registros > 0 ? 
-                        Math.round((erro.total / data.total_registros) * 100) : 0;
-                    
-                    tbodyErros.append(`
-                        <tr>
-                            <td>
-                                <span class="badge bg-warning">${erro.sigla}</span>
-                                <br>
-                                <small>${erro.tipo_erro.substring(0, 30)}${erro.tipo_erro.length > 30 ? '...' : ''}</small>
-                            </td>
-                            <td>
-                                <strong>${erro.sigla}</strong>
-                            </td>
-                            <td>
-                                <span class="badge bg-danger">${erro.total}</span>
-                            </td>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-${index === 0 ? 'danger' : index === 1 ? 'warning' : index === 2 ? 'info' : 'secondary'}" 
-                                         style="width: ${porcentagem}%">
-                                        ${porcentagem}%
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    `);
-                });
-            } else {
-                tbodyErros.append(`
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x mb-3"></i>
-                            <p class="mb-0">Nenhum erro registrado</p>
-                        </td>
-                    </tr>
-                `);
-            }
-        }).fail(function() {
-            showAlert('error', 'Erro!', 'Não foi possível carregar as estatísticas.');
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDashboard();
         });
         
-        // Carregar últimos registros
-        $.get('/api/ultimos-registros', function(data) {
-            const tbody = $('#tabela-ultimos-registros tbody');
-            tbody.empty();
+        async function carregarDashboard() {
+            try {
+                document.getElementById('btn-atualizar').disabled = true;
+                document.getElementById('btn-atualizar').innerHTML = '<i class="bi bi-hourglass"></i> Carregando...';
+                
+                const response = await fetch('/api/estatisticas');
+                const dados = await response.json();
+                
+                // Atualizar cards
+                document.getElementById('total-registros').textContent = dados.total_registros || 0;
+                document.getElementById('registros-hoje').textContent = dados.registros_hoje || 0;
+                document.getElementById('total-filiais').textContent = dados.por_filial ? dados.por_filial.length : 0;
+                document.getElementById('total-categorias').textContent = dados.por_categoria ? dados.por_categoria.length : 0;
+                
+                // Atualizar gráficos
+                if (dados.por_filial && dados.por_filial.length > 0) {
+                    atualizarGraficoFilial(dados.por_filial);
+                }
+                
+                if (dados.por_categoria && dados.por_categoria.length > 0) {
+                    atualizarGraficoCategoria(dados.por_categoria);
+                }
+                
+                // Atualizar tabelas
+                if (dados.top_vendedores && dados.top_vendedores.length > 0) {
+                    atualizarTopVendedores(dados.top_vendedores);
+                }
+                
+                // Carregar últimos registros
+                const ultimosResponse = await fetch('/api/ultimos-registros');
+                const ultimos = await ultimosResponse.json();
+                atualizarUltimosRegistros(ultimos);
+                
+                // Atualizar timestamp
+                document.getElementById('ultima-atualizacao').textContent = 
+                    `Última atualização: ${new Date().toLocaleTimeString('pt-BR')}`;
+                    
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+                alert('Erro ao carregar dados do dashboard.');
+            } finally {
+                document.getElementById('btn-atualizar').disabled = false;
+                document.getElementById('btn-atualizar').innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar';
+            }
+        }
+        
+        function atualizarGraficoFilial(dados) {
+            const ctx = document.getElementById('chartFilial').getContext('2d');
             
-            if (data.length === 0) {
-                tbody.append(`
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x mb-3"></i>
-                            <p class="mb-0">Nenhum registro encontrado</p>
-                        </td>
-                    </tr>
-                `);
+            if (chartFilial) chartFilial.destroy();
+            
+            const labels = dados.map(item => item.filial || 'Desconhecida');
+            const valores = dados.map(item => item.total || 0);
+            
+            chartFilial = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Erros por Filial',
+                        data: valores,
+                        backgroundColor: '#0d6efd',
+                        borderColor: '#0a58ca',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+        
+        function atualizarGraficoCategoria(dados) {
+            const ctx = document.getElementById('chartCategoria').getContext('2d');
+            
+            if (chartCategoria) chartCategoria.destroy();
+            
+            const labels = dados.map(item => item.categoria || 'Desconhecida');
+            const valores = dados.map(item => item.total || 0);
+            
+            chartCategoria = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: [
+                            '#0d6efd', '#198754', '#ffc107', '#6f42c1',
+                            '#fd7e14', '#20c997', '#e83e8c', '#6c757d'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+        
+        function atualizarTopVendedores(dados) {
+            const tbody = document.getElementById('tabela-top-vendedores');
+            tbody.innerHTML = '';
+            
+            dados.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <span class="badge bg-secondary me-2">${index + 1}</span>
+                        ${item.vendedor || 'Desconhecido'}
+                    </td>
+                    <td class="text-end">
+                        <span class="badge bg-danger">${item.total_erros || 0}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function atualizarUltimosRegistros(dados) {
+            const tbody = document.getElementById('tabela-ultimos-registros');
+            tbody.innerHTML = '';
+            
+            if (dados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Nenhum registro encontrado</td></tr>';
                 return;
             }
             
-            data.forEach(function(registro) {
-                const dataFormatada = formatDate(registro.data_ocorrencia);
-                
-                tbody.append(`
-                    <tr>
-                        <td>
-                            <span class="badge bg-secondary">${dataFormatada}</span>
-                        </td>
-                        <td>
-                            <strong>${registro.filial}</strong><br>
-                            <small class="text-muted">${registro.nome_filial}</small>
-                        </td>
-                        <td>${registro.vendedor}</td>
-                        <td>
-                            <span class="badge bg-warning">${registro.sigla}</span>
-                            ${registro.tipo_erro.substring(0, 25)}${registro.tipo_erro.length > 25 ? '...' : ''}
-                        </td>
-                        <td>
-                            <span class="badge bg-danger">${registro.penalizacao}</span>
-                        </td>
-                    </tr>
-                `);
+            dados.forEach(item => {
+                const tr = document.createElement('tr');
+                const data = item.data_ocorrencia ? new Date(item.data_ocorrencia).toLocaleDateString('pt-BR') : '';
+                tr.innerHTML = `
+                    <td>${data}</td>
+                    <td><span class="badge bg-primary">${item.filial || ''}</span></td>
+                    <td>${item.vendedor || ''}</td>
+                    <td><span class="badge bg-warning">${item.sigla || ''}</span></td>
+                `;
+                tbody.appendChild(tr);
             });
-        });
-        
-        // Carregar categorias de erro
-        carregarCategorias();
-    }
-    
-    function carregarCategorias() {
-        $.get('/api/tipos-erro', function(tipos) {
-            const container = $('#categorias-container');
-            container.empty();
-            
-            // Agrupar por categoria
-            const categorias = {};
-            tipos.forEach(function(tipo) {
-                if (!categorias[tipo.categoria]) {
-                    categorias[tipo.categoria] = {
-                        nome: tipo.categoria,
-                        quantidade: 0,
-                        erros: []
-                    };
-                }
-                categorias[tipo.categoria].quantidade += 1;
-                categorias[tipo.categoria].erros.push(tipo);
-            });
-            
-            // Calcular cores para cada categoria
-            const cores = ['primary', 'success', 'warning', 'danger', 'info', 'secondary'];
-            let corIndex = 0;
-            
-            for (const categoriaNome in categorias) {
-                const categoria = categorias[categoriaNome];
-                const cor = cores[corIndex % cores.length];
-                corIndex++;
-                
-                container.append(`
-                    <div class="col-md-4 col-6 mb-3">
-                        <div class="card border-${cor}">
-                            <div class="card-body">
-                                <h5 class="card-title text-${cor}">
-                                    <i class="fas fa-folder me-2"></i>
-                                    ${categoria.nome}
-                                </h5>
-                                <p class="card-text">
-                                    <span class="badge bg-${cor}">${categoria.quantidade} tipos</span>
-                                </p>
-                                <div class="mt-2">
-                                    ${categoria.erros.slice(0, 3).map(erro => `
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <small>
-                                                <span class="badge bg-warning">${erro.sigla}</span>
-                                                ${erro.criterio.substring(0, 20)}${erro.criterio.length > 20 ? '...' : ''}
-                                            </small>
-                                            <small class="text-${cor}">${erro.penalizacao}</small>
-                                        </div>
-                                    `).join('')}
-                                    ${categoria.quantidade > 3 ? `<small class="text-muted">+${categoria.quantidade - 3} mais...</small>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `);
-            }
-        });
-    }
-    
-    function atualizarDashboard() {
-        const btn = $('button[onclick="atualizarDashboard()"]');
-        const originalText = btn.html();
-        
-        btn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-            Atualizando...
-        `);
-        
-        carregarDashboard();
-        
-        setTimeout(function() {
-            btn.prop('disabled', false).html(originalText);
-            showAlert('success', 'Sucesso!', 'Dashboard atualizado com os dados mais recentes!');
-        }, 1000);
-    }
-    
-    function exportarDashboard() {
-        // Gerar relatório geral
-        const filtros = {
-            data_inicio: '',
-            data_fim: '',
-            filial: '',
-            sigla: ''
-        };
-        
-        $.ajax({
-            url: '/api/relatorio',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(filtros),
-            success: function(response) {
-                if (response.success) {
-                    // Criar link de download
-                    const link = document.createElement('a');
-                    link.href = `/download/${response.filename}`;
-                    link.download = response.filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    showAlert('success', 'Sucesso!', `Dashboard exportado com ${response.total_registros} registros!`);
-                } else {
-                    showAlert('error', 'Erro!', response.message);
-                }
-            },
-            error: function() {
-                showAlert('error', 'Erro!', 'Falha na exportação.');
-            }
-        });
-    }
-</script>
-{% endblock %}
+        }
+    </script>
+</body>
+</html>

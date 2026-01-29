@@ -197,7 +197,7 @@ def init_database():
         ("PROCESSOS ADMINISTRATIVOS", "NÃ£o atualizar cadastro de cliente", "CAD", "-3% por caso"),
         ("PROCESSOS ADMINISTRATIVOS", "Falha no registro de ponto", "PTO", "-2% por dia"),
         ("PROCESSOS ADMINISTRATIVOS", "Uniforme incorreto", "UNF", "-3% por dia"),
-        ("PROCESSOS ADMINISTRATIVOS", "NÃ£o concluir tarefas/procrastinação", "TAR", "-2% por ocorrÃªncia"),
+        ("PROCESSOS ADMINISTRATIVOS", "NÃ£o concluir tarefas/ProcrastinaÃ§Ã£o", "TAR", "-2% por ocorrÃªncia"),
         
         # PÃ“S-VENDAS E CLIENTE
         ("PÃ“S-VENDAS E CLIENTE", "Falta de acompanhamento - pÃ³s-venda", "PVD", "-3% por cliente"),
@@ -206,15 +206,15 @@ def init_database():
         ("PÃ“S-VENDAS E CLIENTE", "NÃ£o prestar apoio com recebimento", "REC", "-3% por caso"),
         
         # ESTOQUE E PROCESSOS
-        ("ESTOQUE E PROCESSOS", "Venda para terceiros sem Comunicação", "V3S", "-8% por caso"),
-        ("ESTOQUE E PROCESSOS", "Erro de etiquetagem/precificação", "ETQ", "-4% por divergÃªncia"),
+        ("ESTOQUE E PROCESSOS", "Venda para terceiros sem comunicaÃ§Ã£o", "V3S", "-8% por caso"),
+        ("ESTOQUE E PROCESSOS", "Erro de etiquetagem/precificaÃ§Ã£o", "ETQ", "-4% por divergÃªncia"),
         ("ESTOQUE E PROCESSOS", "LanÃ§ar venda do CD e entregar da loja", "CDL", "-4% por ocorrÃªncia"),
         ("ESTOQUE E PROCESSOS", "Prometer brindes/condiÃ§Ãµes nÃ£o autorizadas", "BRI", "-4% por caso"),
         
         # COMPORTAMENTO PROFISSIONAL
-        ("COMPORTAMENTO PROFISSIONAL", "Não resolver problemas simples", "ATD", "-3% por ocorrÃªncia"),
-        ("COMPORTAMENTO PROFISSIONAL", "Não ajudar na organização da loja", "ORG", "-3% por dia"),
-        ("COMPORTAMENTO PROFISSIONAL", "Não participar da montagem da frente de loja atÃ© 09h00", "FDL", "-2% por dia")
+        ("COMPORTAMENTO PROFISSIONAL", "NÃ£o resolver problemas simples", "ATD", "-3% por ocorrÃªncia"),
+        ("COMPORTAMENTO PROFISSIONAL", "NÃ£o ajudar na organizaÃ§Ã£o da loja", "ORG", "-3% por dia"),
+        ("COMPORTAMENTO PROFISSIONAL", "NÃ£o participar da montagem da frente de loja atÃ© 09h00", "FDL", "-2% por dia")
     ]
     
     cursor.executemany('''
