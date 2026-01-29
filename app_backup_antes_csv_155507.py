@@ -1,4 +1,4 @@
-﻿# app.py - SISTEMA WEB CORRIGIDO
+# app.py - SISTEMA WEB CORRIGIDO
 from flask import Flask, render_template, request, jsonify, send_file, session
 from flask_cors import CORS
 import sqlite3
@@ -30,7 +30,7 @@ def format_date(value, format='%Y-%m-%d'):
 def inject_now():
     return {'now': datetime.now()}
 
-# ========== CONFIGURAÃ‡Ã•ES ==========
+# ========== CONFIGURAÇÕES ==========
 # app.py - SISTEMA WEB COM DADOS REAIS PARA RENDER
 from flask import Flask, render_template, request, jsonify, send_file, session
 from flask_cors import CORS
@@ -64,7 +64,7 @@ def format_date(value, format='%Y-%m-%d'):
 def inject_now():
     return {'now': datetime.now()}
 
-# ========== CONFIGURAÃ‡Ã•ES ==========
+# ========== CONFIGURAÇÕES ==========
 # USAR CAMINHO RELATIVO PARA RENDER
 DATABASE = 'erros_filiais.db'
 
@@ -130,7 +130,7 @@ def init_database():
         ("F12", "Filial F12", "MARIA"),
         ("F13", "Filial F13", "ANA KARLLA"),
         ("F14", "Filial F14", "ANDERSON"),
-        ("F15", "Filial F15", "LUCÃ‰LIA"),
+        ("F15", "Filial F15", "LUCÉLIA"),
         ("F16", "Filial F16", "TALITA"),
         ("F17", "Filial F17", "ADELAR")
     ]
@@ -157,11 +157,11 @@ def init_database():
         ("Vanessa Goncalves", "F07"),
         ("Adriana Mateus dos Santos", "F08"),
         ("Jessica Aline", "F08"),
-        ("JoÃ£o Santiago Silva Cortinas Lopes", "F08"),
+        ("João Santiago Silva Cortinas Lopes", "F08"),
         ("Thais da Silva Rodolfo", "F08"),
         ("Franciele Rodrigues", "F10"),
         ("Kauan Melo da Silva", "F10"),
-        ("Vanessa Daiane CÃ­cero de Lima", "F10"),
+        ("Vanessa Daiane Cícero de Lima", "F10"),
         ("Jefter de Souza Prates", "F12"),
         ("Maira Carolina Avalo Urbieta", "F12"),
         ("Olivia Custodio Jorge Lima", "F12"),
@@ -194,27 +194,27 @@ def init_database():
     # Inserir tipos de erro REAIS conforme tabela fornecida
     tipos_erro_reais = [
         # PROCESSOS ADMINISTRATIVOS
-        ("PROCESSOS ADMINISTRATIVOS", "NÃ£o atualizar cadastro de cliente", "CAD", "-3% por caso"),
+        ("PROCESSOS ADMINISTRATIVOS", "Não atualizar cadastro de cliente", "CAD", "-3% por caso"),
         ("PROCESSOS ADMINISTRATIVOS", "Falha no registro de ponto", "PTO", "-2% por dia"),
         ("PROCESSOS ADMINISTRATIVOS", "Uniforme incorreto", "UNF", "-3% por dia"),
-        ("PROCESSOS ADMINISTRATIVOS", "NÃ£o concluir tarefas/ProcrastinaÃ§Ã£o", "TAR", "-2% por ocorrÃªncia"),
+        ("PROCESSOS ADMINISTRATIVOS", "Não concluir tarefas/Procrastinação", "TAR", "-2% por ocorrência"),
         
-        # PÃ“S-VENDAS E CLIENTE
-        ("PÃ“S-VENDAS E CLIENTE", "Falta de acompanhamento - pÃ³s-venda", "PVD", "-3% por cliente"),
-        ("PÃ“S-VENDAS E CLIENTE", "NÃ£o comunicar OS/AssistÃªncia TÃ©cnica em caso de defeito no produto do cliente", "OSS", "-3% por ocorrÃªncia"),
-        ("PÃ“S-VENDAS E CLIENTE", "Reclamar de comissÃ£o na frente de cliente", "COM", "-5% por ocorrÃªncia"),
-        ("PÃ“S-VENDAS E CLIENTE", "NÃ£o prestar apoio com recebimento", "REC", "-3% por caso"),
+        # PÓS-VENDAS E CLIENTE
+        ("PÓS-VENDAS E CLIENTE", "Falta de acompanhamento - pós-venda", "PVD", "-3% por cliente"),
+        ("PÓS-VENDAS E CLIENTE", "Não comunicar OS/Assistência Técnica em caso de defeito no produto do cliente", "OSS", "-3% por ocorrência"),
+        ("PÓS-VENDAS E CLIENTE", "Reclamar de comissão na frente de cliente", "COM", "-5% por ocorrência"),
+        ("PÓS-VENDAS E CLIENTE", "Não prestar apoio com recebimento", "REC", "-3% por caso"),
         
         # ESTOQUE E PROCESSOS
-        ("ESTOQUE E PROCESSOS", "Venda para terceiros sem comunicaÃ§Ã£o", "V3S", "-8% por caso"),
-        ("ESTOQUE E PROCESSOS", "Erro de etiquetagem/precificaÃ§Ã£o", "ETQ", "-4% por divergÃªncia"),
-        ("ESTOQUE E PROCESSOS", "LanÃ§ar venda do CD e entregar da loja", "CDL", "-4% por ocorrÃªncia"),
-        ("ESTOQUE E PROCESSOS", "Prometer brindes/condiÃ§Ãµes nÃ£o autorizadas", "BRI", "-4% por caso"),
+        ("ESTOQUE E PROCESSOS", "Venda para terceiros sem comunicação", "V3S", "-8% por caso"),
+        ("ESTOQUE E PROCESSOS", "Erro de etiquetagem/precificação", "ETQ", "-4% por divergência"),
+        ("ESTOQUE E PROCESSOS", "Lançar venda do CD e entregar da loja", "CDL", "-4% por ocorrência"),
+        ("ESTOQUE E PROCESSOS", "Prometer brindes/condições não autorizadas", "BRI", "-4% por caso"),
         
         # COMPORTAMENTO PROFISSIONAL
-        ("COMPORTAMENTO PROFISSIONAL", "NÃ£o resolver problemas simples", "ATD", "-3% por ocorrÃªncia"),
-        ("COMPORTAMENTO PROFISSIONAL", "NÃ£o ajudar na organizaÃ§Ã£o da loja", "ORG", "-3% por dia"),
-        ("COMPORTAMENTO PROFISSIONAL", "NÃ£o participar da montagem da frente de loja atÃ© 09h00", "FDL", "-2% por dia")
+        ("COMPORTAMENTO PROFISSIONAL", "Não resolver problemas simples", "ATD", "-3% por ocorrência"),
+        ("COMPORTAMENTO PROFISSIONAL", "Não ajudar na organização da loja", "ORG", "-3% por dia"),
+        ("COMPORTAMENTO PROFISSIONAL", "Não participar da montagem da frente de loja até 09h00", "FDL", "-2% por dia")
     ]
     
     cursor.executemany('''
@@ -238,22 +238,22 @@ init_database()
 
 @app.route('/')
 def index():
-    """PÃ¡gina inicial"""
+    """Página inicial"""
     return render_template('index.html')
 
 @app.route('/registrar')
 def registrar():
-    """PÃ¡gina de registro de erros"""
+    """Página de registro de erros"""
     return render_template('registrar.html')
 
 @app.route('/relatorios')
 def relatorios():
-    """PÃ¡gina de relatÃ³rios"""
+    """Página de relatórios"""
     return render_template('relatorios.html')
 
 @app.route('/dashboard')
 def dashboard():
-    """Dashboard com estatÃ­sticas"""
+    """Dashboard com estatísticas"""
     return render_template('dashboard.html')
 
 # ========== API - DADOS ==========
@@ -360,20 +360,20 @@ def registrar_erro():
     try:
         dados = request.json
         
-        # Verificar se Ã© um Ãºnico erro ou mÃºltiplos
+        # Verificar se é um único erro ou múltiplos
         if isinstance(dados, dict):
             erros = [dados]
         elif isinstance(dados, list):
             erros = dados
         else:
-            return jsonify({'success': False, 'message': 'Formato de dados invÃ¡lido!'}), 400
+            return jsonify({'success': False, 'message': 'Formato de dados inválido!'}), 400
         
         resultados = []
         erros_falhos = []
         
         for i, erro in enumerate(erros):
             try:
-                # Validar dados obrigatÃ³rios
+                # Validar dados obrigatórios
                 campos_obrigatorios = ['filial', 'vendedor', 'tipo_erro', 'sigla', 'penalizacao', 'data_ocorrencia']
                 campos_faltantes = []
                 for campo in campos_obrigatorios:
@@ -383,7 +383,7 @@ def registrar_erro():
                 if campos_faltantes:
                     erros_falhos.append({
                         'indice': i,
-                        'erro': f'Campos obrigatÃ³rios faltando: {", ".join(campos_faltantes)}',
+                        'erro': f'Campos obrigatórios faltando: {", ".join(campos_faltantes)}',
                         'dados': erro
                     })
                     continue
@@ -461,12 +461,12 @@ def registrar_erro():
 
 @app.route('/api/registrar-multiplos', methods=['POST'])
 def registrar_multiplos():
-    """API: Registra mÃºltiplos erros de uma vez - ENDPOINT ALTERNATIVO"""
+    """API: Registra múltiplos erros de uma vez - ENDPOINT ALTERNATIVO"""
     return registrar_erro()
 
 @app.route('/api/ultimos-registros')
 def get_ultimos_registros():
-    """API: Retorna Ãºltimos registros"""
+    """API: Retorna últimos registros"""
     try:
         conn = get_db_connection()
         registros = conn.execute('''
@@ -498,7 +498,7 @@ def get_ultimos_registros():
 
 @app.route('/api/estatisticas')
 def get_estatisticas():
-    """API: Retorna estatÃ­sticas do sistema"""
+    """API: Retorna estatísticas do sistema"""
     try:
         conn = get_db_connection()
         
@@ -548,7 +548,7 @@ def get_estatisticas():
             ORDER BY total DESC
         ''').fetchall()
         
-        # Ãšltimo registro
+        # Último registro
         ultimo_registro = conn.execute('''
             SELECT MAX(data_registro) as ultimo FROM registros_erros
         ''').fetchone()
@@ -567,7 +567,7 @@ def get_estatisticas():
         })
         
     except Exception as e:
-        print(f"Erro em estatÃ­sticas: {e}")
+        print(f"Erro em estatísticas: {e}")
         return jsonify({
             'total_registros': 0,
             'registros_hoje': 0,
@@ -578,7 +578,7 @@ def get_estatisticas():
 
 @app.route('/api/relatorio', methods=['POST'])
 def gerar_relatorio():
-    """API: Gera relatÃ³rio"""
+    """API: Gera relatório"""
     try:
         dados = request.json
         
@@ -655,14 +655,14 @@ def gerar_relatorio():
                 'COD. FILIAL', 
                 'NOME FILIAL', 
                 'GERENTE', 
-                'DATA OCORRÃŠNCIA',
+                'DATA OCORRÊNCIA',
                 'VENDEDOR', 
                 'CATEGORIA ERRO',
                 'TIPO ERRO', 
                 'SIGLA', 
-                'PENALIZAÃ‡ÃƒO',
+                'PENALIZAÇÃO',
                 'QUANTIDADE', 
-                'OBSERVAÃ‡Ã•ES', 
+                'OBSERVAÇÕES', 
                 'REGISTRADO POR', 
                 'DATA REGISTRO'
             ])
@@ -686,7 +686,7 @@ def gerar_relatorio():
         
         return jsonify({
             'success': True,
-            'message': f'RelatÃ³rio gerado com {len(registros)} registros!',
+            'message': f'Relatório gerado com {len(registros)} registros!',
             'filename': filename,
             'filepath': f'/download/{filename}',
             'total_registros': len(registros)
@@ -717,7 +717,7 @@ def get_resumo_mensal(ano, mes):
     try:
         conn = get_db_connection()
         
-        # Filiais com mais erros no mÃªs
+        # Filiais com mais erros no mês
         top_filiais = conn.execute('''
             SELECT 
                 r.filial,
@@ -747,7 +747,7 @@ def get_resumo_mensal(ano, mes):
             LIMIT 10
         ''', (f"{ano}-{mes}",)).fetchall()
         
-        # Total geral do mÃªs
+        # Total geral do mês
         total_mes = conn.execute('''
             SELECT COUNT(*) as total
             FROM registros_erros
@@ -772,7 +772,7 @@ def get_resumo_mensal(ano, mes):
 # ========== ROTA DE TESTE ==========
 @app.route('/teste')
 def teste():
-    """PÃ¡gina de teste para verificar dados"""
+    """Página de teste para verificar dados"""
     return '''
     <!DOCTYPE html>
     <html>
@@ -794,7 +794,7 @@ def teste():
     </head>
     <body>
         <div class="container">
-            <h1>âœ… Sistema de Erros - Dados Reais</h1>
+            <h1>✅ Sistema de Erros - Dados Reais</h1>
             <p><strong>Status:</strong> Banco de dados inicializado com dados reais</p>
             
             <h2>Links de Teste:</h2>
@@ -802,294 +802,55 @@ def teste():
                 <a href="/api/filiais" class="btn">Testar Filiais (13 filiais)</a>
                 <a href="/api/todos-vendedores" class="btn">Testar Vendedores (42 vendedores)</a>
                 <a href="/api/tipos-erro" class="btn">Testar Tipos Erro (15 tipos reais)</a>
-                <a href="/api/estatisticas" class="btn">Testar EstatÃ­sticas</a>
-                <a href="/api/ultimos-registros" class="btn">Ãšltimos Registros</a>
+                <a href="/api/estatisticas" class="btn">Testar Estatísticas</a>
+                <a href="/api/ultimos-registros" class="btn">Últimos Registros</a>
                 <a href="/registrar" class="btn" style="background: #2196F3;">Ir para Registro</a>
                 <a href="/dashboard" class="btn" style="background: #FF9800;">Ir para Dashboard</a>
             </p>
             
             <h2>Funcionalidades Implementadas:</h2>
             <ul>
-                <li><strong>âœ… Banco de dados REAL</strong> com todos os vendedores fornecidos</li>
-                <li><strong>âœ… Gerentes reais</strong> para cada filial</li>
-                <li><strong>âœ… Tipos de erro REAIS</strong> (15 tipos conforme tabela)</li>
-                <li><strong>âœ… Registro de MÃšLTIPLOS erros</strong> simultÃ¢neos</li>
-                <li><strong>âœ… RelatÃ³rios detalhados</strong> com exportaÃ§Ã£o CSV</li>
-                <li><strong>âœ… Dashboard completo</strong> com estatÃ­sticas</li>
-                <li><strong>âœ… Sistema otimizado</strong> para Render/GitHub</li>
+                <li><strong>✅ Banco de dados REAL</strong> com todos os vendedores fornecidos</li>
+                <li><strong>✅ Gerentes reais</strong> para cada filial</li>
+                <li><strong>✅ Tipos de erro REAIS</strong> (15 tipos conforme tabela)</li>
+                <li><strong>✅ Registro de MÚLTIPLOS erros</strong> simultâneos</li>
+                <li><strong>✅ Relatórios detalhados</strong> com exportação CSV</li>
+                <li><strong>✅ Dashboard completo</strong> com estatísticas</li>
+                <li><strong>✅ Sistema otimizado</strong> para Render/GitHub</li>
             </ul>
             
             <h2>Categorias de Erro Implementadas:</h2>
             <ol>
                 <li><strong>PROCESSOS ADMINISTRATIVOS</strong> (4 tipos)</li>
-                <li><strong>PÃ“S-VENDAS E CLIENTE</strong> (4 tipos)</li>
+                <li><strong>PÓS-VENDAS E CLIENTE</strong> (4 tipos)</li>
                 <li><strong>ESTOQUE E PROCESSOS</strong> (4 tipos)</li>
                 <li><strong>COMPORTAMENTO PROFISSIONAL</strong> (3 tipos)</li>
             </ol>
             
-            <p><em>Sistema pronto para produÃ§Ã£o. Todos os dados sÃ£o reais e correspondem aos fornecidos.</em></p>
+            <p><em>Sistema pronto para produção. Todos os dados são reais e correspondem aos fornecidos.</em></p>
         </div>
     </body>
     </html>
     '''
 
-
-# ========== API PARA GERAR CSV DIRETO ==========
-@app.route('/api/gerar-csv', methods=['POST'])
-def gerar_csv():
-    """API: Gera e retorna CSV diretamente para download"""
-    try:
-        dados = request.json
-        
-        conn = get_db_connection()
-        
-        query = '''
-            SELECT 
-                r.filial, 
-                f.nome as nome_filial,
-                f.gerente,
-                r.data_ocorrencia,
-                r.vendedor,
-                r.tipo_erro,
-                t.categoria,
-                r.sigla,
-                r.penalizacao,
-                r.quantidade,
-                r.observacoes,
-                r.registrado_por,
-                r.data_registro
-            FROM registros_erros r
-            LEFT JOIN filiais f ON r.filial = f.codigo
-            LEFT JOIN tipos_erro t ON r.sigla = t.sigla
-            WHERE 1=1
-        '''
-        params = []
-        
-        if dados.get('filial'):
-            query += ' AND r.filial = ?'
-            params.append(dados['filial'])
-        
-        if dados.get('data_inicio'):
-            query += ' AND r.data_ocorrencia >= ?'
-            params.append(dados['data_inicio'])
-        
-        if dados.get('data_fim'):
-            query += ' AND r.data_ocorrencia <= ?'
-            params.append(dados['data_fim'])
-        
-        if dados.get('sigla'):
-            query += ' AND r.sigla = ?'
-            params.append(dados['sigla'])
-        
-        if dados.get('vendedor'):
-            query += ' AND r.vendedor = ?'
-            params.append(dados['vendedor'])
-        
-        if dados.get('categoria'):
-            query += ' AND t.categoria = ?'
-            params.append(dados['categoria'])
-        
-        query += ' ORDER BY r.data_ocorrencia DESC'
-        
-        registros = conn.execute(query, params).fetchall()
-        conn.close()
-        
-        if not registros:
-            return jsonify({'success': False, 'message': 'Nenhum registro encontrado!'})
-        
-        # Criar CSV em memória
-        import io
-        import csv
-        
-        output = io.StringIO()
-        writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_ALL)
-        
-        # Cabeçalho
-        writer.writerow([
-            'FILIAL', 'NOME_FILIAL', 'GERENTE', 'DATA_OCORRENCIA',
-            'VENDEDOR', 'CATEGORIA', 'TIPO_ERRO', 'SIGLA',
-            'PENALIZACAO', 'QUANTIDADE', 'OBSERVACOES',
-            'REGISTRADO_POR', 'DATA_REGISTRO'
-        ])
-        
-        # Dados
-        for reg in registros:
-            writer.writerow([
-                reg['filial'],
-                reg['nome_filial'],
-                reg['gerente'],
-                reg['data_ocorrencia'],
-                reg['vendedor'],
-                reg['categoria'],
-                reg['tipo_erro'],
-                reg['sigla'],
-                reg['penalizacao'],
-                reg['quantidade'],
-                reg['observacoes'],
-                reg['registrado_por'],
-                reg['data_registro']
-            ])
-        
-        # Retornar como arquivo para download
-        output.seek(0)
-        
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"relatorio_erros_{timestamp}.csv"
-        
-        response = app.response_class(
-            response=output.getvalue(),
-            status=200,
-            mimetype='text/csv',
-            headers={
-                'Content-Disposition': f'attachment; filename={filename}',
-                'Content-Type': 'text/csv; charset=utf-8'
-            }
-        )
-        
-        return response
-        
-    except Exception as e:
-        print(f"Erro ao gerar CSV: {e}")
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-
-# ========== API PARA GERAR CSV DIRETO ==========
-@app.route('/api/gerar-csv', methods=['POST'])
-def gerar_csv():
-    """API: Gera e retorna CSV diretamente para download"""
-    try:
-        dados = request.json
-        
-        conn = get_db_connection()
-        
-        query = '''
-            SELECT 
-                r.filial, 
-                f.nome as nome_filial,
-                f.gerente,
-                r.data_ocorrencia,
-                r.vendedor,
-                r.tipo_erro,
-                t.categoria,
-                r.sigla,
-                r.penalizacao,
-                r.quantidade,
-                r.observacoes,
-                r.registrado_por,
-                r.data_registro
-            FROM registros_erros r
-            LEFT JOIN filiais f ON r.filial = f.codigo
-            LEFT JOIN tipos_erro t ON r.sigla = t.sigla
-            WHERE 1=1
-        '''
-        params = []
-        
-        if dados.get('filial'):
-            query += ' AND r.filial = ?'
-            params.append(dados['filial'])
-        
-        if dados.get('data_inicio'):
-            query += ' AND r.data_ocorrencia >= ?'
-            params.append(dados['data_inicio'])
-        
-        if dados.get('data_fim'):
-            query += ' AND r.data_ocorrencia <= ?'
-            params.append(dados['data_fim'])
-        
-        if dados.get('sigla'):
-            query += ' AND r.sigla = ?'
-            params.append(dados['sigla'])
-        
-        if dados.get('vendedor'):
-            query += ' AND r.vendedor = ?'
-            params.append(dados['vendedor'])
-        
-        if dados.get('categoria'):
-            query += ' AND t.categoria = ?'
-            params.append(dados['categoria'])
-        
-        query += ' ORDER BY r.data_ocorrencia DESC'
-        
-        registros = conn.execute(query, params).fetchall()
-        conn.close()
-        
-        if not registros:
-            return jsonify({'success': False, 'message': 'Nenhum registro encontrado!'})
-        
-        # Criar CSV em memória
-        import io
-        import csv
-        
-        output = io.StringIO()
-        writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_ALL)
-        
-        # Cabeçalho
-        writer.writerow([
-            'FILIAL', 'NOME_FILIAL', 'GERENTE', 'DATA_OCORRENCIA',
-            'VENDEDOR', 'CATEGORIA', 'TIPO_ERRO', 'SIGLA',
-            'PENALIZACAO', 'QUANTIDADE', 'OBSERVACOES',
-            'REGISTRADO_POR', 'DATA_REGISTRO'
-        ])
-        
-        # Dados
-        for reg in registros:
-            writer.writerow([
-                reg['filial'],
-                reg['nome_filial'],
-                reg['gerente'],
-                reg['data_ocorrencia'],
-                reg['vendedor'],
-                reg['categoria'],
-                reg['tipo_erro'],
-                reg['sigla'],
-                reg['penalizacao'],
-                reg['quantidade'],
-                reg['observacoes'],
-                reg['registrado_por'],
-                reg['data_registro']
-            ])
-        
-        # Retornar como arquivo para download
-        output.seek(0)
-        
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"relatorio_erros_{timestamp}.csv"
-        
-        response = app.response_class(
-            response=output.getvalue(),
-            status=200,
-            mimetype='text/csv',
-            headers={
-                'Content-Disposition': f'attachment; filename={filename}',
-                'Content-Type': 'text/csv; charset=utf-8'
-            }
-        )
-        
-        return response
-        
-    except Exception as e:
-        print(f"Erro ao gerar CSV: {e}")
-        return jsonify({'success': False, 'message': str(e)}), 500
-
 # ========== INICIAR SERVIDOR ==========
 
 if __name__ == '__main__':
     print("="*70)
-    print("ðŸŒ SISTEMA WEB DE REGISTRO DE ERROS - DADOS REAIS")
+    print("🌐 SISTEMA WEB DE REGISTRO DE ERROS - DADOS REAIS")
     print("="*70)
-    print("ðŸ“ Banco inicializado com:")
-    print(f"   â€¢ 13 Filiais com gerentes reais")
-    print(f"   â€¢ 42 Vendedores reais")
-    print(f"   â€¢ 15 Tipos de erro reais (4 categorias)")
-    print("ðŸ“ Acesse: http://localhost:5000")
-    print("ðŸ“ Teste: http://localhost:5000/teste")
+    print("📍 Banco inicializado com:")
+    print(f"   • 13 Filiais com gerentes reais")
+    print(f"   • 42 Vendedores reais")
+    print(f"   • 15 Tipos de erro reais (4 categorias)")
+    print("📍 Acesse: http://localhost:5000")
+    print("📍 Teste: http://localhost:5000/teste")
     print("="*70)
     
-    # Criar pastas necessÃ¡rias
+    # Criar pastas necessárias
     for pasta in ['relatorios', 'backup']:
         if not os.path.exists(pasta):
             os.makedirs(pasta)
     
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
-
