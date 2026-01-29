@@ -952,6 +952,125 @@ def gerar_csv():
         print(f"Erro ao gerar CSV: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
+
+# ========== API PARA GERAR CSV DIRETO ==========
+@app.route('/api/gerar-csv', methods=['POST'])
+def gerar_csv():
+    """API: Gera e retorna CSV diretamente para download"""
+    try:
+        dados = request.json
+        
+        conn = get_db_connection()
+        
+        query = '''
+            SELECT 
+                r.filial, 
+                f.nome as nome_filial,
+                f.gerente,
+                r.data_ocorrencia,
+                r.vendedor,
+                r.tipo_erro,
+                t.categoria,
+                r.sigla,
+                r.penalizacao,
+                r.quantidade,
+                r.observacoes,
+                r.registrado_por,
+                r.data_registro
+            FROM registros_erros r
+            LEFT JOIN filiais f ON r.filial = f.codigo
+            LEFT JOIN tipos_erro t ON r.sigla = t.sigla
+            WHERE 1=1
+        '''
+        params = []
+        
+        if dados.get('filial'):
+            query += ' AND r.filial = ?'
+            params.append(dados['filial'])
+        
+        if dados.get('data_inicio'):
+            query += ' AND r.data_ocorrencia >= ?'
+            params.append(dados['data_inicio'])
+        
+        if dados.get('data_fim'):
+            query += ' AND r.data_ocorrencia <= ?'
+            params.append(dados['data_fim'])
+        
+        if dados.get('sigla'):
+            query += ' AND r.sigla = ?'
+            params.append(dados['sigla'])
+        
+        if dados.get('vendedor'):
+            query += ' AND r.vendedor = ?'
+            params.append(dados['vendedor'])
+        
+        if dados.get('categoria'):
+            query += ' AND t.categoria = ?'
+            params.append(dados['categoria'])
+        
+        query += ' ORDER BY r.data_ocorrencia DESC'
+        
+        registros = conn.execute(query, params).fetchall()
+        conn.close()
+        
+        if not registros:
+            return jsonify({'success': False, 'message': 'Nenhum registro encontrado!'})
+        
+        # Criar CSV em memória
+        import io
+        import csv
+        
+        output = io.StringIO()
+        writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_ALL)
+        
+        # Cabeçalho
+        writer.writerow([
+            'FILIAL', 'NOME_FILIAL', 'GERENTE', 'DATA_OCORRENCIA',
+            'VENDEDOR', 'CATEGORIA', 'TIPO_ERRO', 'SIGLA',
+            'PENALIZACAO', 'QUANTIDADE', 'OBSERVACOES',
+            'REGISTRADO_POR', 'DATA_REGISTRO'
+        ])
+        
+        # Dados
+        for reg in registros:
+            writer.writerow([
+                reg['filial'],
+                reg['nome_filial'],
+                reg['gerente'],
+                reg['data_ocorrencia'],
+                reg['vendedor'],
+                reg['categoria'],
+                reg['tipo_erro'],
+                reg['sigla'],
+                reg['penalizacao'],
+                reg['quantidade'],
+                reg['observacoes'],
+                reg['registrado_por'],
+                reg['data_registro']
+            ])
+        
+        # Retornar como arquivo para download
+        output.seek(0)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"relatorio_erros_{timestamp}.csv"
+        
+        response = app.response_class(
+            response=output.getvalue(),
+            status=200,
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename={filename}',
+                'Content-Type': 'text/csv; charset=utf-8'
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        print(f"Erro ao gerar CSV: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 # ========== INICIAR SERVIDOR ==========
 
 if __name__ == '__main__':
@@ -973,5 +1092,4 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
-
 
