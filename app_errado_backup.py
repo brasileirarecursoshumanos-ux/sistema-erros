@@ -1,0 +1,328 @@
+# app.py - SISTEMA WEB CORRIGIDO
+from flask import Flask, render_template, request, jsonify, send_file, session
+from flask_cors import CORS
+import sqlite3
+from datetime import datetime
+import os
+import csv
+
+app = Flask(__name__)
+app.secret_key = 'sistema_erros_2024_seguro'
+CORS(app)
+
+# ========== ADICIONAR FILTRO DATE ==========
+@app.template_filter('date')
+def format_date(value, format='%Y-%m-%d'):
+    """Filtro para formatar datas no Jinja2"""
+    if value is None:
+        return ''
+    if isinstance(value, str):
+        try:
+            value = datetime.strptime(value, '%Y-%m-%d')
+        except:
+            return value
+    if isinstance(value, datetime):
+        return value.strftime(format)
+    return value
+
+# Adicionar data atual para todos os templates
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now()}
+
+# ========== CONFIGURAÇÕES ==========
+DATABASE = '../erros_filiais.db'
+
+def get_db_connection():
+    """Conecta ao banco de dados"""
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# ========== ROTAS PRINCIPAIS ==========
+
+@app.route('/')
+def index():
+    """Página inicial"""
+    return render_template('index.html')
+
+@app.route('/registrar')
+def registrar():
+    """Página de registro de erros"""
+    return render_template('registrar.html')
+
+@app.route('/relatorios')
+def relatorios():
+    """Página de relatórios"""
+    return render_template('relatorios.html')
+
+@app.route('/dashboard')
+def dashboard():
+    """Dashboard com estatísticas"""
+    return render_template('dashboard.html')
+
+# ========== API - DADOS ==========
+
+@app.route('/api/filiais')
+def get_filiais():
+    """API: Retorna todas as filiais"""
+    try:
+        conn = get_db_connection()
+        filiais = conn.execute('''
+            SELECT codigo, nome, gerente FROM filiais ORDER BY codigo
+        ''').fetchall()
+        conn.close()
+        
+        return jsonify([dict(filial) for filial in filiais])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/vendedores/<filial>')
+def get_vendedores(filial):
+    """API: Retorna vendedores de uma filial"""
+    try:
+        conn = get_db_connection()
+        vendedores = conn.execute('''
+            SELECT nome_completo, matricula FROM vendedores 
+            WHERE filial = ? ORDER BY nome_completo
+        ''', (filial,)).fetchall()
+        conn.close()
+        
+        return jsonify([dict(v) for v in vendedores])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/tipos-erro')
+def get_tipos_erro():
+    """API: Retorna todos os tipos de erro"""
+    try:
+        conn = get_db_connection()
+        tipos = conn.execute('''
+            SELECT categoria, criterio, sigla, penalizacao 
+            FROM tipos_erro ORDER BY categoria, id
+        ''').fetchall()
+        conn.close()
+        
+        return jsonify([dict(tipo) for tipo in tipos])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/registrar-erro', methods=['POST'])
+def registrar_erro():
+    """API: Registra um novo erro"""
+    try:
+        dados = request.json
+        
+        # Validar dados obrigatórios
+        campos_obrigatorios = ['filial', 'vendedor', 'tipo_erro', 'sigla', 'penalizacao', 'data_ocorrencia']
+        for campo in campos_obrigatorios:
+            if campo not in dados or not dados[campo]:
+                return jsonify({'success': False, 'message': f'Campo {campo} é obrigatório!'}), 400
+        
+        # Inserir no banco
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO registros_erros 
+            (filial, vendedor, tipo_erro, sigla, penalizacao, 
+             data_ocorrencia, quantidade, observacoes, registrado_por)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            dados['filial'],
+            dados['vendedor'],
+            dados['tipo_erro'],
+            dados['sigla'],
+            dados['penalizacao'],
+            dados['data_ocorrencia'],
+            dados.get('quantidade', 1),
+            dados.get('observacoes', ''),
+            dados.get('registrado_por', 'Sistema Web')
+        ))
+        
+        conn.commit()
+        registro_id = cursor.lastrowid
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Erro registrado com sucesso!',
+            'registro_id': registro_id
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/ultimos-registros')
+def get_ultimos_registros():
+    """API: Retorna últimos registros"""
+    try:
+        conn = get_db_connection()
+        registros = conn.execute('''
+            SELECT r.id, r.filial, r.vendedor, r.tipo_erro, r.sigla, 
+                   r.penalizacao, r.data_ocorrencia, r.quantidade,
+                   r.registrado_por, f.gerente, f.nome as nome_filial
+            FROM registros_erros r
+            JOIN filiais f ON r.filial = f.codigo
+            ORDER BY r.data_registro DESC
+            LIMIT 10
+        ''').fetchall()
+        conn.close()
+        
+        return jsonify([dict(reg) for reg in registros])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/estatisticas')
+def get_estatisticas():
+    """API: Retorna estatísticas do sistema"""
+    try:
+        conn = get_db_connection()
+        
+        # Total de registros
+        total_registros = conn.execute('SELECT COUNT(*) FROM registros_erros').fetchone()[0]
+        
+        # Registros hoje
+        hoje = datetime.now().strftime('%Y-%m-%d')
+        registros_hoje = conn.execute('''
+            SELECT COUNT(*) FROM registros_erros WHERE DATE(data_registro) = ?
+        ''', (hoje,)).fetchone()[0]
+        
+        # Top 5 filiais com mais registros
+        top_filiais = conn.execute('''
+            SELECT filial, COUNT(*) as total 
+            FROM registros_erros 
+            GROUP BY filial 
+            ORDER BY total DESC 
+            LIMIT 5
+        ''').fetchall()
+        
+        # Top 5 erros mais comuns
+        top_erros = conn.execute('''
+            SELECT tipo_erro, sigla, COUNT(*) as total 
+            FROM registros_erros 
+            GROUP BY tipo_erro 
+            ORDER BY total DESC 
+            LIMIT 5
+        ''').fetchall()
+        
+        conn.close()
+        
+        return jsonify({
+            'total_registros': total_registros,
+            'registros_hoje': registros_hoje,
+            'top_filiais': [dict(f) for f in top_filiais],
+            'top_erros': [dict(e) for e in top_erros]
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/relatorio', methods=['POST'])
+def gerar_relatorio():
+    """API: Gera relatório"""
+    try:
+        dados = request.json
+        
+        conn = get_db_connection()
+        
+        # Construir query
+        query = '''
+            SELECT r.filial, r.data_ocorrencia, r.vendedor, r.tipo_erro, 
+                   r.sigla, r.penalizacao, r.quantidade, r.observacoes,
+                   r.registrado_por, r.data_registro,
+                   f.nome as nome_filial, f.gerente
+            FROM registros_erros r
+            JOIN filiais f ON r.filial = f.codigo
+            WHERE 1=1
+        '''
+        params = []
+        
+        if dados.get('filial'):
+            query += ' AND r.filial = ?'
+            params.append(dados['filial'])
+        
+        if dados.get('data_inicio'):
+            query += ' AND r.data_ocorrencia >= ?'
+            params.append(dados['data_inicio'])
+        
+        if dados.get('data_fim'):
+            query += ' AND r.data_ocorrencia <= ?'
+            params.append(dados['data_fim'])
+        
+        if dados.get('sigla'):
+            query += ' AND r.sigla = ?'
+            params.append(dados['sigla'])
+        
+        query += ' ORDER BY r.data_ocorrencia DESC'
+        
+        registros = conn.execute(query, params).fetchall()
+        conn.close()
+        
+        if not registros:
+            return jsonify({'success': False, 'message': 'Nenhum registro encontrado!'})
+        
+        # Gerar arquivo CSV
+        if not os.path.exists('relatorios'):
+            os.makedirs('relatorios')
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        tipo = dados.get('filial', 'geral') if not dados.get('sigla') else dados.get('sigla')
+        filename = f"relatorio_{tipo}_{timestamp}.csv"
+        filepath = os.path.join('relatorios', filename)
+        
+        with open(filepath, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f, delimiter=';')
+            
+            writer.writerow(['FILIAL', 'NOME FILIAL', 'GERENTE', 'DATA OCORRÊNCIA', 
+                           'VENDEDOR', 'TIPO ERRO', 'SIGLA', 'PENALIZAÇÃO',
+                           'QUANTIDADE', 'OBSERVAÇÕES', 'REGISTRADO POR', 'DATA REGISTRO'])
+            
+            for reg in registros:
+                writer.writerow([
+                    reg['filial'], reg['nome_filial'], reg['gerente'],
+                    reg['data_ocorrencia'], reg['vendedor'], reg['tipo_erro'],
+                    reg['sigla'], reg['penalizacao'], reg['quantidade'],
+                    reg['observacoes'], reg['registrado_por'], reg['data_registro']
+                ])
+        
+        return jsonify({
+            'success': True,
+            'message': f'Relatório gerado com {len(registros)} registros!',
+            'filename': filename,
+            'filepath': f'/download/{filename}',
+            'total_registros': len(registros)
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    """Download do arquivo CSV"""
+    try:
+        filepath = os.path.join('relatorios', filename)
+        return send_file(
+            filepath,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='text/csv'
+        )
+    except Exception as e:
+        return f"Erro ao baixar arquivo: {e}", 404
+
+# ========== INICIAR SERVIDOR ==========
+
+if __name__ == '__main__':
+    print("="*70)
+    print("🌐 SISTEMA WEB DE REGISTRO DE ERROS")
+    print("="*70)
+    print("📍 Acesse: http://localhost:5000")
+    print("="*70)
+    
+    # Criar pasta para relatórios
+    if not os.path.exists('relatorios'):
+        os.makedirs('relatorios')
+    
+    app.run(debug=True, host='0.0.0.0', port=5000)
