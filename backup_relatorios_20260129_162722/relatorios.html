@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - Sistema de Erros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+        .card { border: none; box-shadow: 0 0 20px rgba(0,0,0,.08); border-radius: 10px; }
+        .card-header { border-radius: 10px 10px 0 0 !important; font-weight: 600; }
+        .btn-primary { background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-success { background-color: #198754; border-color: #198754; }
+        .table th { font-weight: 600; }
+        .badge { font-size: 0.85em; }
+        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; }
+    </style>
+</head>
+<body>
+    <!-- Navbar Simples -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-file-earmark-text"></i> Sistema de Relatórios
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link text-white" href="/">Início</a>
+                <a class="nav-link text-white" href="/registrar">Registrar</a>
+                <a class="nav-link active" href="/relatorios">Relatórios</a>
+                <a class="nav-link text-white" href="/dashboard">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Título -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="bi bi-file-earmark-text text-primary"></i> Gerar Relatórios</h2>
+                <p class="text-muted">Filtre e exporte relatórios em formato CSV</p>
+            </div>
+        </div>
+
+        <!-- Filtros SIMPLIFICADOS -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-funnel"></i> Filtros de Busca
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label>Filial:</label>
+                        <select class="form-select" id="filial">
+                            <option value="">Todas as Filiais</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Data Início:</label>
+                        <input type="date" class="form-control" id="dataInicio">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Data Fim:</label>
+                        <input type="date" class="form-control" id="dataFim">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button class="btn btn-primary me-2" onclick="buscarDados()">
+                            <i class="bi bi-search"></i> Buscar Dados
+                        </button>
+                        <button class="btn btn-success" onclick="exportarCSV()" id="btnExportar" disabled>
+                            <i class="bi bi-download"></i> Exportar CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="card">
+            <div class="card-header bg-success text-white d-flex justify-content-between">
+                <span><i class="bi bi-table"></i> Resultados</span>
+                <span class="badge bg-light text-dark" id="contador">0 registros</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Filial</th>
+                                <th>Vendedor</th>
+                                <th>Tipo de Erro</th>
+                                <th>Penalização</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaResultados">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 48px; display: block; margin-bottom: 10px;"></i>
+                                    Nenhum dado encontrado. Use os filtros para buscar.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+            <p class="text-white mt-3">Processando...</p>
+        </div>
+    </div>
+
+    <script>
+        // Variável para armazenar dados
+        let dadosAtuais = [];
+        
+        // Quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Página de relatórios carregada');
+            
+            // Configurar datas (últimos 30 dias)
+            const hoje = new Date().toISOString().split('T')[0];
+            const umMesAtras = new Date();
+            umMesAtras.setMonth(umMesAtras.getMonth() - 1);
+            const dataInicio = umMesAtras.toISOString().split('T')[0];
+            
+            document.getElementById('dataInicio').value = dataInicio;
+            document.getElementById('dataFim').value = hoje;
+            
+            // Carregar filiais
+            carregarFiliais();
+        });
+        
+        // Carregar filiais no select
+        async function carregarFiliais() {
+            try {
+                console.log('Carregando filiais...');
+                const response = await fetch('/api/filiais');
+                const filiais = await response.json();
+                
+                const select = document.getElementById('filial');
+                filiais.forEach(filial => {
+                    const option = document.createElement('option');
+                    option.value = filial.codigo;
+                    option.textContent = `${filial.codigo} - ${filial.gerente}`;
+                    select.appendChild(option);
+                });
+                
+                console.log(`✅ ${filiais.length} filiais carregadas`);
+            } catch (error) {
+                console.error('Erro ao carregar filiais:', error);
+            }
+        }
+        
+        // FUNÇÃO PRINCIPAL DE BUSCA - CORRIGIDA
+        async function buscarDados() {
+            try {
+                mostrarLoading(true);
+                console.log('Iniciando busca...');
+                
+                // Coletar filtros
+                const filtros = {
+                    filial: document.getElementById('filial').value,
+                    data_inicio: document.getElementById('dataInicio').value,
+                    data_fim: document.getElementById('dataFim').value
+                };
+                
+                console.log('Filtros enviados:', filtros);
+                
+                // Fazer requisição para a API
+                const response = await fetch('/api/relatorio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(filtros)
+                });
+                
+                console.log('Resposta recebida, status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const resultado = await response.json();
+                console.log('Resultado da API:', resultado);
+                
+                if (resultado.success) {
+                    // IMPORTANTE: Verificar se os dados estão em resultado.registros
+                    const registros = resultado.registros || [];
+                    console.log(`✅ ${registros.length} registros recebidos`);
+                    
+                    // Armazenar dados para exportação
+                    dadosAtuais = registros;
+                    
+                    // Atualizar tabela
+                    atualizarTabela(registros);
+                    
+                    // Atualizar contador
+                    document.getElementById('contador').textContent = `${resultado.total_registros || 0} registros`;
+                    
+                    // Habilitar botão de exportação
+                    if (registros.length > 0) {
+                        document.getElementById('btnExportar').disabled = false;
+                        console.log('✅ Botão de exportação habilitado');
+                    } else {
+                        document.getElementById('btnExportar').disabled = true;
+                        console.log('⚠️ Nenhum dado para exportar');
+                    }
+                    
+                } else {
+                    console.error('API retornou erro:', resultado.message);
+                    alert('Erro: ' + resultado.message);
+                    limparTabela();
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro na busca:', error);
+                alert('Erro ao buscar dados. Verifique o console (F12) para detalhes.');
+                limparTabela();
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+        
+        // Atualizar tabela com resultados
+        function atualizarTabela(dados) {
+            const tbody = document.getElementById('tabelaResultados');
+            tbody.innerHTML = '';
+            
+            if (!dados || dados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 48px; display: block; margin-bottom: 10px;"></i>
+                            Nenhum registro encontrado com os filtros selecionados.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Adicionar cada registro na tabela
+            dados.forEach(registro => {
+                const tr = document.createElement('tr');
+                
+                // Formatar data
+                const dataFormatada = registro.data_ocorrencia ? 
+                    new Date(registro.data_ocorrencia).toLocaleDateString('pt-BR') : '';
+                
+                tr.innerHTML = `
+                    <td>${dataFormatada}</td>
+                    <td><span class="badge bg-primary">${registro.filial || ''}</span></td>
+                    <td>${registro.vendedor || ''}</td>
+                    <td>${registro.tipo_erro || ''}</td>
+                    <td><span class="badge bg-danger">${registro.penalizacao || ''}</span></td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            console.log(`✅ Tabela atualizada com ${dados.length} registros`);
+        }
+        
+        // FUNÇÃO DE EXPORTAÇÃO CSV - TESTADA
+        async function exportarCSV() {
+            if (!dadosAtuais || dadosAtuais.length === 0) {
+                alert('Não há dados para exportar! Faça uma busca primeiro.');
+                console.error('Tentativa de exportar sem dados');
+                return;
+            }
+            
+            console.log(`Iniciando exportação de ${dadosAtuais.length} registros...`);
+            
+            try {
+                mostrarLoading(true);
+                
+                // Coletar filtros atuais
+                const filtros = {
+                    filial: document.getElementById('filial').value,
+                    data_inicio: document.getElementById('dataInicio').value,
+                    data_fim: document.getElementById('dataFim').value
+                };
+                
+                console.log('Exportando com filtros:', filtros);
+                
+                // Primeiro, tentar usar a API /api/gerar-csv
+                try {
+                    const response = await fetch('/api/gerar-csv', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(filtros)
+                    });
+                    
+                    if (response.ok) {
+                        // Criar download do arquivo
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `relatorio_${new Date().toISOString().slice(0,10)}.csv`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                        
+                        console.log('✅ CSV exportado via API');
+                        mostrarLoading(false);
+                        return;
+                    }
+                } catch (apiError) {
+                    console.warn('API de CSV falhou, usando método local:', apiError);
+                }
+                
+                // Método alternativo: gerar CSV localmente
+                console.log('Usando método local de geração de CSV...');
+                
+                // Cabeçalho do CSV
+                const cabecalho = [
+                    'Data Ocorrência',
+                    'Filial',
+                    'Vendedor',
+                    'Tipo de Erro',
+                    'Sigla',
+                    'Penalização',
+                    'Observações'
+                ];
+                
+                // Linhas de dados
+                const linhas = dadosAtuais.map(registro => [
+                    registro.data_ocorrencia || '',
+                    registro.filial || '',
+                    registro.vendedor || '',
+                    registro.tipo_erro || '',
+                    registro.sigla || '',
+                    registro.penalizacao || '',
+                    `"${(registro.observacoes || '').replace(/"/g, '""')}"`
+                ]);
+                
+                // Combinar tudo
+                const csvConteudo = [
+                    cabecalho.join(';'),
+                    ...linhas.map(linha => linha.join(';'))
+                ].join('\n');
+                
+                // Criar blob com BOM para Excel
+                const blob = new Blob(['\uFEFF' + csvConteudo], {
+                    type: 'text/csv;charset=utf-8;'
+                });
+                
+                // Criar link de download
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Nome do arquivo com timestamp
+                const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+                link.download = `relatorio_erros_${timestamp}.csv`;
+                
+                // Disparar download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Limpar
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                console.log('✅ CSV gerado localmente e download iniciado');
+                
+            } catch (error) {
+                console.error('❌ Erro crítico na exportação:', error);
+                alert('Erro ao exportar CSV: ' + error.message);
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+        
+        // Limpar tabela
+        function limparTabela() {
+            const tbody = document.getElementById('tabelaResultados');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i class="bi bi-inbox" style="font-size: 48px; display: block; margin-bottom: 10px;"></i>
+                        Nenhum dado encontrado.
+                    </td>
+                </tr>
+            `;
+            
+            document.getElementById('contador').textContent = '0 registros';
+            document.getElementById('btnExportar').disabled = true;
+            dadosAtuais = [];
+        }
+        
+        // Mostrar/ocultar loading
+        function mostrarLoading(mostrar) {
+            document.getElementById('loading').style.display = mostrar ? 'block' : 'none';
+        }
+        
+        // Função auxiliar para debug
+        window.debugDados = function() {
+            console.log('Dados atuais:', dadosAtuais);
+            console.log('Quantidade:', dadosAtuais.length);
+            alert(`Dados na memória: ${dadosAtuais.length} registros\nVerifique o console (F12) para detalhes.`);
+        };
+    </script>
+</body>
+</html>

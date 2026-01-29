@@ -3,13 +3,11 @@
 *.pyo
 *.pyd
 .Python
+env/
+venv/
+ENV/
 *.db
 *.sqlite3
 relatorios/
 backup/
-venv/
-env/
-.env
-.venv
-instance/
 .DS_Store
